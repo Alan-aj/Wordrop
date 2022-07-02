@@ -12,3 +12,11 @@ web-build/
 
 # macOS
 .DS_Store
+
+.expo-shared/
+build/
+.vscode
+
+
+# expo init Wordrop --npm
+# expo start
