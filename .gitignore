@@ -19,4 +19,6 @@ build/
 
 
 # expo init Wordrop --npm
-# expo start
+# npm start
+
+# # git rm -r --cached file
