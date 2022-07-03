@@ -50,7 +50,9 @@ export default function App() {
     return row == curRow && col == curCol;
   }
 
-  const getCellColor = (letter, row, col) => {
+  const getCellColor = (row, col) => {
+    const letter = rows[row][col];
+
     if (row >= curRow) {
       return colors.black;
     }
@@ -62,6 +64,16 @@ export default function App() {
     }
     return colors.darkgrey;
   }
+
+  const getAllLetterColor = (color) => {
+    return rows.flatMap((row, i) =>
+      row.filter((cell, j) => getCellColor(i, j) === color)
+    )
+  }
+
+  const greenCaps = getAllLetterColor(colors.primary);
+  const yellowCaps = getAllLetterColor(colors.secondary);
+  const greyCaps = getAllLetterColor(colors.darkgrey);
 
   return (
     <View style={styles.container}>
@@ -78,7 +90,7 @@ export default function App() {
                   styles.cell,
                   {
                     borderColor: isCellActive(i, j) ? colors.lightgrey : colors.darkgrey,
-                    backgroundColor: getCellColor(cell, i, j),
+                    backgroundColor: getCellColor(i, j),
                   }
                 ]}
                 key={`cell-${i}-${j}`}>
@@ -90,7 +102,12 @@ export default function App() {
 
       </ScrollView>
 
-      <Keyboard onKeyPressed={onKeyPressed} />
+      <Keyboard
+        onKeyPressed={onKeyPressed}
+        greenCaps={greenCaps}
+        yellowCaps={yellowCaps}
+        greyCaps={greyCaps}
+      />
     </View>
   );
 }
@@ -112,7 +129,6 @@ const styles = StyleSheet.create({
   },
   map: {
     alignSelf: "stretch",
-    height: 100,
     margin: 5,
   },
   row: {
