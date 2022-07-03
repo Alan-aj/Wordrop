@@ -28,10 +28,10 @@ export default function App() {
   }, [curRow])
 
   const checkGameState = () => {
-    if (checkIfWon()) {
+    if (checkIfWon() && gameState !== "won") {
       Alert.alert("Hurraay", "You won!");
       setGameState("won");
-    } else if (checkIfLost()) {
+    } else if (checkIfLost() && gameState !== "lost") {
       Alert.alert("Meh", "Try again tomorrow!");
       setGameState("lost");
     }
@@ -42,7 +42,7 @@ export default function App() {
     return row.every((letter, i) => letter === letters[i])
   }
   const checkIfLost = () => {
-    return curRow === rows.length;
+    return !checkIfWon() && curRow === rows.length;
   }
 
   const onKeyPressed = (key) => {
