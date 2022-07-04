@@ -23,8 +23,8 @@ const Game = () => {
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
     const [loaded, setLoaded] = useState(false);
-    const [win,setWin] = useState(0)
-    const [lose,setLose] = useState(0)
+    const [win, setWin] = useState(0)
+    const [lose, setLose] = useState(0)
 
     useEffect(() => {
         if (curRow > 0) {
@@ -47,7 +47,7 @@ const Game = () => {
         if (loaded) {
             storeStatus();
         }
-    }, [win,lose])
+    }, [win, lose])
 
 
     const storeState = async () => {
@@ -81,14 +81,13 @@ const Game = () => {
         setLoaded(true);
     }
 
-    const storeStatus = async ()=>{
+    const storeStatus = async () => {
         const data = {
             win,
             lose,
         }
         try {
             const dataString = JSON.stringify(data);
-            console.log("status", dataString)
             await AsyncStorage.setItem("@status", dataString);
         } catch (e) {
             console.log("Failed to write stat to async storage", e);
@@ -108,23 +107,23 @@ const Game = () => {
 
     const checkGameState = () => {
         if (checkIfWon() && gameState !== "won") {
-            Alert.alert("Hurraay", "You won!",[
+            Alert.alert("Hurraay", "You won!", [
                 {
-                  text: "Refresh",
-                  onPress: () => AsyncStorage.removeItem("@game"),
-                  style: "default",
+                    text: "Refresh",
+                    onPress: () => AsyncStorage.removeItem("@game"),
+                    style: "default",
                 },
-              ],);
+            ]);
             setGameState("won");
             setWin(prevCount => prevCount + 1)
         } else if (checkIfLost() && gameState !== "lost") {
-            Alert.alert("Meh", "Try again tomorrow!",[
+            Alert.alert("Meh", "Try again tomorrow!", [
                 {
-                  text: "Refresh",
-                  onPress: () => AsyncStorage.removeItem("@game"),
-                  style: "default",
+                    text: "Refresh",
+                    onPress: () => AsyncStorage.removeItem("@game"),
+                    style: "default",
                 },
-              ],);
+            ]);
             setGameState("lost");
             setLose(prevCount => prevCount + 1)
         }
@@ -198,6 +197,10 @@ const Game = () => {
 
     if (!loaded) {
         return (<ActivityIndicator />)
+    }
+
+    if (gameState !== "playing") {
+        return (<EndScreen gameState={gameState} />)
     }
 
     return (
