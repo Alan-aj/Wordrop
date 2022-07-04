@@ -16,7 +16,7 @@ web-build/
 .expo-shared
 build/
 .vscode
-
+/src/words.js
 
 # expo init Wordrop --npm
 # npm start

@@ -1,141 +1,15 @@
-import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Platform, ScrollView, Alert } from 'react-native';
-import { colors, CLEAR, ENTER } from './src/constants'
-import Keyboard from './src/components/Keyboard'
-
-const NUMBER_OF_TRIES = 6;
-const copyArray = (arr) => {
-  return [...arr.map((rows) => [...rows])]
-}
+import { StyleSheet, Text, View, Platform } from 'react-native';
+import { colors} from './src/constants'
+import Game from './src/components/Game';
 
 export default function App() {
-
-  const word = "hello";
-  const letters = word.split('');
-
-  const [rows, setRows] = useState(
-    new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill(""))
-  );
-  const [curRow, setCurRow] = useState(0);
-  const [curCol, setCurCol] = useState(0);
-  const [gameState, setGameState] = useState("playing"); // won,lost,playing
-
-  useEffect(() => {
-    if (curRow > 0) {
-      checkGameState();
-    }
-  }, [curRow])
-
-  const checkGameState = () => {
-    if (checkIfWon() && gameState !== "won") {
-      Alert.alert("Hurraay", "You won!");
-      setGameState("won");
-    } else if (checkIfLost() && gameState !== "lost") {
-      Alert.alert("Meh", "Try again tomorrow!");
-      setGameState("lost");
-    }
-  }
-
-  const checkIfWon = () => {
-    const row = rows[curRow - 1];
-    return row.every((letter, i) => letter === letters[i])
-  }
-  const checkIfLost = () => {
-    return !checkIfWon() && curRow === rows.length;
-  }
-
-  const onKeyPressed = (key) => {
-    if (gameState !== "playing"){
-      return;
-    }
-    const updateRows = copyArray(rows);
-
-    if (key === CLEAR) {
-      const prevCol = curCol - 1;
-      if (prevCol >= 0) {
-        updateRows[curRow][prevCol] = "";
-        setRows(updateRows);
-        setCurCol(prevCol);
-      }
-      return;
-    }
-    if (key === ENTER) {
-      if (curCol === rows[0].length) {
-        setCurRow(curRow + 1)
-        setCurCol(0)
-      }
-      return;
-    }
-
-    if (curCol < rows[0].length) {
-      updateRows[curRow][curCol] = key;
-      setRows(updateRows);
-      setCurCol(curCol + 1);
-    }
-  }
-  const isCellActive = (row, col) => {
-    return row == curRow && col == curCol;
-  }
-
-  const getCellColor = (row, col) => {
-    const letter = rows[row][col];
-
-    if (row >= curRow) {
-      return colors.black;
-    }
-    if (letter === letters[col]) {
-      return colors.primary;
-    }
-    if (letters.includes(letter)) {
-      return colors.secondary;
-    }
-    return colors.darkgrey;
-  }
-
-  const getAllLetterColor = (color) => {
-    return rows.flatMap((row, i) =>
-      row.filter((cell, j) => getCellColor(i, j) === color)
-    )
-  }
-
-  const greenCaps = getAllLetterColor(colors.primary);
-  const yellowCaps = getAllLetterColor(colors.secondary);
-  const greyCaps = getAllLetterColor(colors.darkgrey);
 
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-
       <Text style={styles.title}>WORDROP</Text>
-
-      <ScrollView style={styles.map}>
-        {rows.map((row, i) => (
-          <View style={styles.row} key={`row-${i}`}>
-            {row.map((cell, j) => (
-              <View
-                style={[
-                  styles.cell,
-                  {
-                    borderColor: isCellActive(i, j) ? colors.lightgrey : colors.darkgrey,
-                    backgroundColor: getCellColor(i, j),
-                  }
-                ]}
-                key={`cell-${i}-${j}`}>
-                <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
-              </View>
-            ))}
-          </View>
-        ))}
-
-      </ScrollView>
-
-      <Keyboard
-        onKeyPressed={onKeyPressed}
-        greenCaps={greenCaps}
-        yellowCaps={yellowCaps}
-        greyCaps={greyCaps}
-      />
+      <Game />
     </View>
   );
 }
@@ -145,7 +19,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.black,
     alignItems: 'center',
-    paddingTop: Platform.OS === "android" ? 30 : 0
+    paddingTop: 20,
+    paddingBottom: 75,
   },
   title: {
     color: colors.lightgrey,
@@ -153,30 +28,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 7,
     padding: 10,
-    paddingBottom: 20
   },
-  map: {
-    alignSelf: "stretch",
-    margin: 5,
-  },
-  row: {
-    alignSelf: "stretch",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  cell: {
-    flex: 1,
-    aspectRatio: 1,
-    margin: 3,
-    borderColor: colors.darkgrey,
-    borderWidth: 3,
-    maxWidth: 65,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cellText: {
-    color: colors.lightgrey,
-    fontWeight: "bold",
-    fontSize: 28,
-  }
 });

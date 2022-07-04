@@ -9,7 +9,6 @@ export default StyleSheet.create({
   keyboard: {
     alignSelf: "stretch",
     marginTop: "auto",
-    paddingBottom: 10,
   },
   row: {
     alignSelf: "stretch",
