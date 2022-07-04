@@ -38,6 +38,7 @@ const Keyboard = ({
                 styles.key,
                 isLongButton(key) ? { width: keyWidth * 1.4 } : {},
                 { backgroundColor: getKeyBGColor(key) },
+                key === ENTER || key === CLEAR ? { maxWidth: 80} : {}
               ]}
             >
               <Text style={styles.keyText}>{key.toUpperCase()}</Text>

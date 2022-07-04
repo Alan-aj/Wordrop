@@ -23,6 +23,8 @@ export default StyleSheet.create({
     backgroundColor: colors.grey,
     justifyContent: "center",
     alignItems: "center",
+    maxWidth: 50,
+    maxHeight: 60,
   },
   keyText: {
     color: colors.lightgrey,

@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Alert } from 'react-native';
+import { Text, View, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { colors, CLEAR, ENTER } from '../../constants'
 import Keyboard from '../Keyboard'
 import words from '../../words';
 import styles from "./Game.styles";
 import { copyArray } from '../../Utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NUMBER_OF_TRIES = 6;
 
 const Game = () => {
 
+    // AsyncStorage.removeItem("@game")
+    // AsyncStorage.removeItem("@status")
     const word = words[1];
     const letters = word.split('');
 
@@ -19,6 +22,9 @@ const Game = () => {
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
+    const [loaded, setLoaded] = useState(false);
+    const [win,setWin] = useState(0)
+    const [lose,setLose] = useState(0)
 
     useEffect(() => {
         if (curRow > 0) {
@@ -26,13 +32,101 @@ const Game = () => {
         }
     }, [curRow])
 
+    useEffect(() => {
+        if (loaded) {
+            storeState();
+        }
+    }, [rows, curRow, curCol, gameState])
+
+    useEffect(() => {
+        readStatus();
+        readState();
+    }, [])
+
+    useEffect(() => {
+        if (loaded) {
+            storeStatus();
+        }
+    }, [win,lose])
+
+
+    const storeState = async () => {
+        const data = {
+            rows,
+            curRow,
+            curCol,
+            gameState
+        }
+        try {
+            const dataString = JSON.stringify(data);
+            await AsyncStorage.setItem("@game", dataString);
+        } catch (e) {
+            console.log("Failed to write data to async storage", e);
+        }
+
+    };
+
+    const readState = async () => {
+        const dataString = await AsyncStorage.getItem("@game");
+        try {
+            const data = JSON.parse(dataString);
+            setRows(data.rows);
+            setCurRow(data.curRow);
+            setCurCol(data.curCol);
+            setGameState(data.gameState);
+        } catch (e) {
+            console.log("Couldn't parse the state");
+        }
+
+        setLoaded(true);
+    }
+
+    const storeStatus = async ()=>{
+        const data = {
+            win,
+            lose,
+        }
+        try {
+            const dataString = JSON.stringify(data);
+            console.log("status", dataString)
+            await AsyncStorage.setItem("@status", dataString);
+        } catch (e) {
+            console.log("Failed to write stat to async storage", e);
+        }
+    }
+    const readStatus = async () => {
+        const dataString = await AsyncStorage.getItem("@status");
+        try {
+            const data = JSON.parse(dataString);
+            setWin(data.win);
+            setLose(data.lose);
+        } catch (e) {
+            console.log("Couldn't read the status");
+        }
+
+    }
+
     const checkGameState = () => {
         if (checkIfWon() && gameState !== "won") {
-            Alert.alert("Hurraay", "You won!");
+            Alert.alert("Hurraay", "You won!",[
+                {
+                  text: "Refresh",
+                  onPress: () => AsyncStorage.removeItem("@game"),
+                  style: "default",
+                },
+              ],);
             setGameState("won");
+            setWin(prevCount => prevCount + 1)
         } else if (checkIfLost() && gameState !== "lost") {
-            Alert.alert("Meh", "Try again tomorrow!");
+            Alert.alert("Meh", "Try again tomorrow!",[
+                {
+                  text: "Refresh",
+                  onPress: () => AsyncStorage.removeItem("@game"),
+                  style: "default",
+                },
+              ],);
             setGameState("lost");
+            setLose(prevCount => prevCount + 1)
         }
     }
 
@@ -102,8 +196,12 @@ const Game = () => {
     const yellowCaps = getAllLetterColor(colors.secondary);
     const greyCaps = getAllLetterColor(colors.darkgrey);
 
+    if (!loaded) {
+        return (<ActivityIndicator />)
+    }
+
     return (
-        <View>
+        <>
             <ScrollView style={styles.map}>
                 {rows.map((row, i) => (
                     <View style={styles.row} key={`row-${i}`}>
@@ -131,7 +229,7 @@ const Game = () => {
                 greyCaps={greyCaps}
             />
 
-        </View>
+        </>
     );
 }
 

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Platform } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors} from './src/constants'
 import Game from './src/components/Game';
 
@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.black,
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 75,
+    paddingTop: 15,
+    paddingBottom: 5,
   },
   title: {
     color: colors.lightgrey,
