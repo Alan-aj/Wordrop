@@ -8,6 +8,7 @@ import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { SlideInLeft, ZoomIn, FlipInEasyY } from "react-native-reanimated";
 import React from 'react';
+import { AntDesign } from '@expo/vector-icons';
 
 const NUMBER_OF_TRIES = 6;
 const TOTAL_LEVEL = 5;
@@ -130,13 +131,13 @@ const Game = () => {
             setGameState("won");
             setWin(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
-            setTimeout(()=>{setModalView(true)},1000);
+            setTimeout(() => { setModalView(true) }, 500);
         } else if (checkIfLost() && gameState !== "lost") {
 
             setGameState("lost");
             setLose(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
-            setTimeout(()=>{setModalView(true)},1000);
+            setTimeout(() => { setModalView(true) }, 500);
         }
     }
 
@@ -253,13 +254,25 @@ const Game = () => {
 
     return (
         <>
+            <Pressable style={{
+                // borderWidth: 1,
+                // borderColor: colors.secondary,
+                flexDirection: "row",
+                // flex: 0.5,
+                borderRadius: 5,
+                margin: 5,
+                padding: 5
+            }}>
+                <AntDesign name="infocirlceo" size={24} color={colors.grey} style={{ marginHorizontal: 10 }} onPress={() => { setModalView(!modalView) }} />
+                <AntDesign name="questioncircleo" size={24} color={colors.grey} style={{ marginHorizontal: 10 }} />
+            </Pressable>
             <ScrollView style={styles.map}>
                 {rows.map((row, i) => (
                     <Animated.View entering={SlideInLeft.delay(i * 30)} style={styles.row} key={`row-${i}`}>
                         {row.map((cell, j) => (
                             <React.Fragment key={`main-${i}-${j}`}>
                                 {i < curRow && (
-                                    <Animated.View entering={FlipInEasyY.delay(j*80)}
+                                    <Animated.View entering={FlipInEasyY.delay(j * 80)}
                                         style={getCellStyle(i, j)}
                                         key={`cell-color-${i}-${j}`}>
                                         <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
@@ -298,7 +311,8 @@ const Game = () => {
             >
                 <View style={styles.centered}>
                     <View style={styles.model}>
-                        <Text style={styles.title}>{gameState === "won" ? "Congrats!" : "Level failed!"}</Text>
+                        <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10 }} onPress={() => { setModalView(!modalView) }} />
+                        <Text style={styles.title}>{gameState === "playing" ? "Paused!" : gameState === "won" ? "Congrats!" : "Level failed!"}</Text>
                         <Text style={styles.subtitle}>SCORE</Text>
                         <View style={{ flexDirection: "row", justifyContent: "center" }}>
                             <Number number={played} label={"Played"} />
@@ -306,7 +320,7 @@ const Game = () => {
                             <Number number={lose} label={"Lose"} />
                         </View>
                         <View style={{ flexDirection: "row", marginVertical: 35, marginHorizontal: 10 }}>
-                            <Pressable onPress={tryAgain} style={{
+                            <Pressable onPress={tryAgain} disabled={gameState == "playing"} style={{
                                 flex: 1,
                                 backgroundColor: colors.secondary,
                                 borderRadius: 25,
@@ -317,7 +331,7 @@ const Game = () => {
                             }}>
                                 <Text>Try again</Text>
                             </Pressable>
-                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL == wordCount + 1} style={{
+                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL == wordCount + 1 || gameState == "playing"} style={{
                                 flex: 1,
                                 backgroundColor: colors.primary,
                                 borderRadius: 25,

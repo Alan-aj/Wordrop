@@ -17,7 +17,7 @@ export default StyleSheet.create({
         margin: 3,
         borderColor: colors.darkgrey,
         borderWidth: 3,
-        maxWidth: 65,
+        maxWidth: 60,
         justifyContent: "center",
         alignItems: "center",
     },
@@ -47,9 +47,9 @@ export default StyleSheet.create({
         backgroundColor: "#00000099"
     },
     model: {
-        flex: .5,
+        // flex: .5,
         width:300,
-        // height: 400,
+        height: 380,
         backgroundColor: colors.darkgrey,
         borderRadius: 20,
         padding: 10
