@@ -26,4 +26,32 @@ export default StyleSheet.create({
         fontWeight: "bold",
         fontSize: 28,
     },
+    title: {
+        fontSize: 30,
+        color: "white",
+        textAlign: "center",
+        marginVertical: 30,
+        justifyContent: "center"
+    },
+    subtitle: {
+        fontSize: 20,
+        color: colors.lightgrey,
+        textAlign: "center",
+        marginVertical: 15,
+        justifyContent: "center"
+    },
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#00000099"
+    },
+    model: {
+        flex: .5,
+        width:300,
+        // height: 400,
+        backgroundColor: colors.darkgrey,
+        borderRadius: 20,
+        padding: 10
+    }
 });

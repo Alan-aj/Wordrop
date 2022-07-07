@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { Text, View, ScrollView, Modal, ActivityIndicator, Pressable } from 'react-native';
 import { colors, CLEAR, ENTER } from '../../constants'
 import Keyboard from '../Keyboard'
 import words from '../../words';
 import styles from "./Game.styles";
 import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import EndScreen from '../EndScreen'
 
 const NUMBER_OF_TRIES = 6;
+
+const Number = ({ number, label }) => (
+    <View style={{ alignItems: "center", margin: 15 }}>
+        <Text style={{ color: colors.lightgrey, fontSize: 40, fontWeight: "bold" }}>{number}</Text>
+        <Text style={{ color: colors.lightgrey, fontSize: 20 }}>{label}</Text>
+    </View>
+)
 
 const Game = () => {
 
@@ -19,8 +25,9 @@ const Game = () => {
     const [win, setWin] = useState(0)
     const [lose, setLose] = useState(0)
     const [played, setPlayed] = useState(0)
+    const [wordCount, setWordCount] = useState(0)
 
-    const word = words[1];
+    const word = words[wordCount];
     const letters = word.split('');
     const [rows, setRows] = useState(
         new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill(""))
@@ -28,7 +35,6 @@ const Game = () => {
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
-    // const [showModal, setShowModal] = useState(false);
 
 
 
@@ -53,7 +59,7 @@ const Game = () => {
         if (loaded) {
             storeStatus();
         }
-    }, [win, lose, played])
+    }, [win, lose, played, wordCount])
 
 
     const storeState = async () => {
@@ -92,6 +98,7 @@ const Game = () => {
             played,
             win,
             lose,
+            wordCount
         }
         try {
             const dataString = JSON.stringify(data);
@@ -107,6 +114,7 @@ const Game = () => {
             setWin(data.win);
             setLose(data.lose);
             setPlayed(data.played);
+            setWordCount(data.wordCount)
             console.log(data)
         } catch (e) {
             console.log("Couldn't read the status");
@@ -210,12 +218,8 @@ const Game = () => {
         return (<ActivityIndicator />)
     }
 
-    if (gameState !== "playing") {
-        return (
-            <EndScreen won={gameState === "won"} />
-        )
-
-    }
+    const tryAgain = () => { }
+    const nextLevel = () => { }
 
     return (
         <>
@@ -245,13 +249,48 @@ const Game = () => {
                 yellowCaps={yellowCaps}
                 greyCaps={greyCaps}
             />
-
-            {/* <Modal
-                visible={showModal}
+            <Modal
+                visible={gameState !== "playing"} 
+                transparent 
+                animationType='fade'
             >
-                
-            </Modal> */}
+                <View style={styles.centered}>
+                    <View style={styles.model}>
+                        <Text style={styles.title}>{gameState === "won" ? "Congrats!" : "Level failed!"}</Text>
+                        <Text style={styles.subtitle}>SCORE</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+                            <Number number={played} label={"Played"} />
+                            <Number number={win} label={"Win"} />
+                            <Number number={lose} label={"Lose"} />
+                        </View>
+                        <View style={{ flexDirection: "row", marginVertical: 35, marginHorizontal: 10 }}>
+                            <Pressable onPress={tryAgain} style={{
+                                flex: 1,
+                                backgroundColor: colors.secondary,
+                                borderRadius: 25,
+                                margin: 5,
+                                padding: 10,
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}>
+                                <Text>Try again</Text>
+                            </Pressable>
+                            <Pressable onPress={nextLevel} style={{
+                                flex: 1,
+                                backgroundColor: colors.primary,
+                                borderRadius: 25,
+                                margin: 5,
+                                padding: 10,
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}>
+                                <Text>Next level</Text>
+                            </Pressable>
+                        </View>
 
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
