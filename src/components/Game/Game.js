@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Modal, ActivityIndicator, Pressable } from 'react-native';
+import { Text, View, ScrollView, Modal, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { colors, CLEAR, ENTER } from '../../constants'
 import Keyboard from '../Keyboard'
 import words from '../../words';
@@ -8,6 +8,7 @@ import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NUMBER_OF_TRIES = 6;
+const TOTAL_LEVEL = 5;
 
 const Number = ({ number, label }) => (
     <View style={{ alignItems: "center", margin: 15 }}>
@@ -30,12 +31,12 @@ const Game = () => {
     const word = words[wordCount];
     const letters = word.split('');
     const [rows, setRows] = useState(
-        new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill(""))
+        new Array(NUMBER_OF_TRIES).fill(new Array(word.length).fill(""))
     );
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
-
+    const [modalView, setModalView] = useState(false);
 
 
     useEffect(() => {
@@ -48,7 +49,7 @@ const Game = () => {
         if (loaded) {
             storeState();
         }
-    }, [rows, curRow, curCol, gameState])
+    }, [rows, curRow, curCol, gameState, modalView])
 
     useEffect(() => {
         readStatus();
@@ -124,27 +125,17 @@ const Game = () => {
 
     const checkGameState = () => {
         if (checkIfWon() && gameState !== "won") {
-            // Alert.alert("Hurraay", "You won!", [
-            //     {
-            //         text: "Refresh",
-            //         onPress: () => AsyncStorage.removeItem("@game"),
-            //         style: "default",
-            //     },
-            // ]);
+
             setGameState("won");
             setWin(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
+            setModalView(true)
         } else if (checkIfLost() && gameState !== "lost") {
-            // Alert.alert("Meh", "Try again tomorrow!", [
-            //     {
-            //         text: "Refresh",
-            //         onPress: () => AsyncStorage.removeItem("@game"),
-            //         style: "default",
-            //     },
-            // ]);
+
             setGameState("lost");
             setLose(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
+            setModalView(true)
         }
     }
 
@@ -218,8 +209,38 @@ const Game = () => {
         return (<ActivityIndicator />)
     }
 
-    const tryAgain = () => { }
-    const nextLevel = () => { }
+    const tryAgain = async () => {
+        try {
+            await AsyncStorage.removeItem("@game")
+            setRows(new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill("")))
+            setCurRow(0);
+            setCurCol(0);
+            setGameState("playing");
+            setModalView(false)
+        }
+        catch (e) {
+            console.log("failed to remove")
+        }
+
+    }
+    const nextLevel = async () => {
+        try {
+            await AsyncStorage.removeItem("@game")
+            const newLetter = words[wordCount+1]
+            setWordCount(prevCount => prevCount + 1)
+
+            setRows(
+                new Array(NUMBER_OF_TRIES).fill(new Array(newLetter.length).fill(""))
+            )
+            setCurRow(0);
+            setCurCol(0);
+            setGameState("playing");
+            setModalView(false)
+        }
+        catch (e) {
+            console.log("failed to remove")
+        }
+    }
 
     return (
         <>
@@ -250,8 +271,8 @@ const Game = () => {
                 greyCaps={greyCaps}
             />
             <Modal
-                visible={gameState !== "playing"} 
-                transparent 
+                visible={modalView}
+                transparent
                 animationType='fade'
             >
                 <View style={styles.centered}>
@@ -275,7 +296,7 @@ const Game = () => {
                             }}>
                                 <Text>Try again</Text>
                             </Pressable>
-                            <Pressable onPress={nextLevel} style={{
+                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL==wordCount+1} style={{
                                 flex: 1,
                                 backgroundColor: colors.primary,
                                 borderRadius: 25,
