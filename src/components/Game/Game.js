@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { Text, View, ScrollView, Modal, ActivityIndicator } from 'react-native';
 import { colors, CLEAR, ENTER } from '../../constants'
 import Keyboard from '../Keyboard'
 import words from '../../words';
 import styles from "./Game.styles";
 import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EndScreen from '../EndScreen'
 
 const NUMBER_OF_TRIES = 6;
 
@@ -13,18 +14,23 @@ const Game = () => {
 
     // AsyncStorage.removeItem("@game")
     // AsyncStorage.removeItem("@status")
+
+    const [loaded, setLoaded] = useState(false);
+    const [win, setWin] = useState(0)
+    const [lose, setLose] = useState(0)
+    const [played, setPlayed] = useState(0)
+
     const word = words[1];
     const letters = word.split('');
-
     const [rows, setRows] = useState(
         new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill(""))
     );
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
-    const [loaded, setLoaded] = useState(false);
-    const [win, setWin] = useState(0)
-    const [lose, setLose] = useState(0)
+    // const [showModal, setShowModal] = useState(false);
+
+
 
     useEffect(() => {
         if (curRow > 0) {
@@ -47,7 +53,7 @@ const Game = () => {
         if (loaded) {
             storeStatus();
         }
-    }, [win, lose])
+    }, [win, lose, played])
 
 
     const storeState = async () => {
@@ -83,6 +89,7 @@ const Game = () => {
 
     const storeStatus = async () => {
         const data = {
+            played,
             win,
             lose,
         }
@@ -99,6 +106,8 @@ const Game = () => {
             const data = JSON.parse(dataString);
             setWin(data.win);
             setLose(data.lose);
+            setPlayed(data.played);
+            console.log(data)
         } catch (e) {
             console.log("Couldn't read the status");
         }
@@ -107,25 +116,27 @@ const Game = () => {
 
     const checkGameState = () => {
         if (checkIfWon() && gameState !== "won") {
-            Alert.alert("Hurraay", "You won!", [
-                {
-                    text: "Refresh",
-                    onPress: () => AsyncStorage.removeItem("@game"),
-                    style: "default",
-                },
-            ]);
+            // Alert.alert("Hurraay", "You won!", [
+            //     {
+            //         text: "Refresh",
+            //         onPress: () => AsyncStorage.removeItem("@game"),
+            //         style: "default",
+            //     },
+            // ]);
             setGameState("won");
             setWin(prevCount => prevCount + 1)
+            setPlayed(prevCount => prevCount + 1)
         } else if (checkIfLost() && gameState !== "lost") {
-            Alert.alert("Meh", "Try again tomorrow!", [
-                {
-                    text: "Refresh",
-                    onPress: () => AsyncStorage.removeItem("@game"),
-                    style: "default",
-                },
-            ]);
+            // Alert.alert("Meh", "Try again tomorrow!", [
+            //     {
+            //         text: "Refresh",
+            //         onPress: () => AsyncStorage.removeItem("@game"),
+            //         style: "default",
+            //     },
+            // ]);
             setGameState("lost");
             setLose(prevCount => prevCount + 1)
+            setPlayed(prevCount => prevCount + 1)
         }
     }
 
@@ -200,7 +211,10 @@ const Game = () => {
     }
 
     if (gameState !== "playing") {
-        return (<EndScreen gameState={gameState} />)
+        return (
+            <EndScreen won={gameState === "won"} />
+        )
+
     }
 
     return (
@@ -231,6 +245,12 @@ const Game = () => {
                 yellowCaps={yellowCaps}
                 greyCaps={greyCaps}
             />
+
+            {/* <Modal
+                visible={showModal}
+            >
+                
+            </Modal> */}
 
         </>
     );
