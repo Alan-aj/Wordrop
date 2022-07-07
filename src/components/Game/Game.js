@@ -6,6 +6,8 @@ import words from '../../words';
 import styles from "./Game.styles";
 import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Animated, { SlideInLeft, ZoomIn, FlipInEasyY } from "react-native-reanimated";
+import React from 'react';
 
 const NUMBER_OF_TRIES = 6;
 const TOTAL_LEVEL = 5;
@@ -116,7 +118,6 @@ const Game = () => {
             setLose(data.lose);
             setPlayed(data.played);
             setWordCount(data.wordCount)
-            console.log(data)
         } catch (e) {
             console.log("Couldn't read the status");
         }
@@ -129,13 +130,13 @@ const Game = () => {
             setGameState("won");
             setWin(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
-            setModalView(true)
+            setTimeout(()=>{setModalView(true)},1000);
         } else if (checkIfLost() && gameState !== "lost") {
 
             setGameState("lost");
             setLose(prevCount => prevCount + 1)
             setPlayed(prevCount => prevCount + 1)
-            setModalView(true)
+            setTimeout(()=>{setModalView(true)},1000);
         }
     }
 
@@ -205,6 +206,14 @@ const Game = () => {
     const yellowCaps = getAllLetterColor(colors.secondary);
     const greyCaps = getAllLetterColor(colors.darkgrey);
 
+    const getCellStyle = (i, j) => [
+        styles.cell,
+        {
+            borderColor: isCellActive(i, j) ? colors.lightgrey : colors.darkgrey,
+            backgroundColor: getCellColor(i, j),
+        }
+    ]
+
     if (!loaded) {
         return (<ActivityIndicator />)
     }
@@ -226,7 +235,7 @@ const Game = () => {
     const nextLevel = async () => {
         try {
             await AsyncStorage.removeItem("@game")
-            const newLetter = words[wordCount+1]
+            const newLetter = words[wordCount + 1]
             setWordCount(prevCount => prevCount + 1)
 
             setRows(
@@ -246,21 +255,33 @@ const Game = () => {
         <>
             <ScrollView style={styles.map}>
                 {rows.map((row, i) => (
-                    <View style={styles.row} key={`row-${i}`}>
+                    <Animated.View entering={SlideInLeft.delay(i * 30)} style={styles.row} key={`row-${i}`}>
                         {row.map((cell, j) => (
-                            <View
-                                style={[
-                                    styles.cell,
-                                    {
-                                        borderColor: isCellActive(i, j) ? colors.lightgrey : colors.darkgrey,
-                                        backgroundColor: getCellColor(i, j),
-                                    }
-                                ]}
-                                key={`cell-${i}-${j}`}>
-                                <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
-                            </View>
+                            <React.Fragment key={`main-${i}-${j}`}>
+                                {i < curRow && (
+                                    <Animated.View entering={FlipInEasyY.delay(j*80)}
+                                        style={getCellStyle(i, j)}
+                                        key={`cell-color-${i}-${j}`}>
+                                        <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
+                                    </Animated.View>
+                                )}
+                                {i === curRow && !!cell && (
+                                    <Animated.View entering={ZoomIn}
+                                        style={getCellStyle(i, j)}
+                                        key={`cell-active-${i}-${j}`}>
+                                        <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
+                                    </Animated.View>
+                                )}
+                                {!cell && (
+                                    <View
+                                        style={getCellStyle(i, j)}
+                                        key={`cell-${i}-${j}`}>
+                                        <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
+                                    </View>
+                                )}
+                            </React.Fragment>
                         ))}
-                    </View>
+                    </Animated.View>
                 ))}
             </ScrollView>
 
@@ -296,7 +317,7 @@ const Game = () => {
                             }}>
                                 <Text>Try again</Text>
                             </Pressable>
-                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL==wordCount+1} style={{
+                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL == wordCount + 1} style={{
                                 flex: 1,
                                 backgroundColor: colors.primary,
                                 borderRadius: 25,
