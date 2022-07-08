@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { SlideInLeft, ZoomIn, FlipInEasyY } from "react-native-reanimated";
 import React from 'react';
 import { AntDesign } from '@expo/vector-icons';
+import Help from '../Help';
 
 const NUMBER_OF_TRIES = 6;
 const TOTAL_LEVEL = 5;
@@ -40,6 +41,7 @@ const Game = () => {
     const [curCol, setCurCol] = useState(0);
     const [gameState, setGameState] = useState("playing"); // won,lost,playing
     const [modalView, setModalView] = useState(false);
+    const [helpModal, setHelpModal] = useState(false);
 
 
     useEffect(() => {
@@ -255,16 +257,13 @@ const Game = () => {
     return (
         <>
             <Pressable style={{
-                // borderWidth: 1,
-                // borderColor: colors.secondary,
                 flexDirection: "row",
-                // flex: 0.5,
                 borderRadius: 5,
                 margin: 5,
                 padding: 5
             }}>
                 <AntDesign name="infocirlceo" size={24} color={colors.grey} style={{ marginHorizontal: 10 }} onPress={() => { setModalView(!modalView) }} />
-                <AntDesign name="questioncircleo" size={24} color={colors.grey} style={{ marginHorizontal: 10 }} />
+                <AntDesign name="questioncircleo" size={24} color={colors.grey} style={{ marginHorizontal: 10 }} onPress={() => { setHelpModal(!helpModal) }} />
             </Pressable>
             <ScrollView style={styles.map}>
                 {rows.map((row, i) => (
@@ -343,6 +342,19 @@ const Game = () => {
                                 <Text>Next level</Text>
                             </Pressable>
                         </View>
+
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                visible={helpModal}
+                transparent
+                animationType='fade'
+            >
+                <View style={styles.centered}>
+                    <View style={styles.model}>
+                        <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10 }} onPress={() => { setHelpModal(!helpModal) }} />
+                        <Help />
 
                     </View>
                 </View>
