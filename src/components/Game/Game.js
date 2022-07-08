@@ -310,7 +310,7 @@ const Game = () => {
             >
                 <View style={styles.centered}>
                     <View style={styles.model}>
-                        <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10 }} onPress={() => { setModalView(!modalView) }} />
+                        <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10, }} onPress={() => { setModalView(!modalView) }} />
                         <Text style={styles.title}>{gameState === "playing" ? "Paused!" : gameState === "won" ? "Congrats!" : "Level failed!"}</Text>
                         <Text style={styles.subtitle}>SCORE</Text>
                         <View style={{ flexDirection: "row", justifyContent: "center" }}>
@@ -326,7 +326,8 @@ const Game = () => {
                                 margin: 5,
                                 padding: 10,
                                 alignItems: "center",
-                                justifyContent: "center"
+                                justifyContent: "center",
+                                elevation: 5
                             }}>
                                 <Text>Try again</Text>
                             </Pressable>
@@ -337,7 +338,8 @@ const Game = () => {
                                 margin: 5,
                                 padding: 10,
                                 alignItems: "center",
-                                justifyContent: "center"
+                                justifyContent: "center",
+                                elevation:5
                             }}>
                                 <Text>Next level</Text>
                             </Pressable>
@@ -355,7 +357,7 @@ const Game = () => {
                     <View style={styles.model}>
                         <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10 }} onPress={() => { setHelpModal(!helpModal) }} />
                         <Help />
-
+                        
                     </View>
                 </View>
             </Modal>
