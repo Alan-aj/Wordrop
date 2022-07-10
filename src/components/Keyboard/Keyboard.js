@@ -29,7 +29,7 @@ const Keyboard = ({
   return (
     <Animated.View entering={SlideInDown.springify().mass(0.5)} style={styles.keyboard}>
       {keys.map((keyRow, i) => (
-        <View style={styles.row} key={`row-${i}`}>
+        <View style={styles.row} key={`key-row-${i}`}>
           {keyRow.map((key) => (
             <Pressable
               onPress={() => onKeyPressed(key)}

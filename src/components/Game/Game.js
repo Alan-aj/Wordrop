@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Text, View, ScrollView, Modal, ActivityIndicator, Pressable, Alert } from 'react-native';
 import { colors, CLEAR, ENTER } from '../../constants'
 import Keyboard from '../Keyboard'
-import words from '../../words';
+// import words from '../../words';
 import styles from "./Game.styles";
 import { copyArray } from '../../Utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,20 +22,22 @@ const Number = ({ number, label }) => (
 )
 
 const Game = () => {
-
+    
+    var randomWords = require('random-words');
     // AsyncStorage.removeItem("@game")
     // AsyncStorage.removeItem("@status")
+
 
     const [loaded, setLoaded] = useState(false);
     const [win, setWin] = useState(0)
     const [lose, setLose] = useState(0)
     const [played, setPlayed] = useState(0)
-    const [wordCount, setWordCount] = useState(0)
-
-    const word = words[wordCount];
-    const letters = word.split('');
+    const [newWord, setNewWord] = useState(randomWords())
+    const [gamePlayed, setGamePlayed] = useState(0)
+    // const word = words[gamePlayed];
+    const letters = newWord.split('');
     const [rows, setRows] = useState(
-        new Array(NUMBER_OF_TRIES).fill(new Array(word.length).fill(""))
+        new Array(NUMBER_OF_TRIES).fill(new Array(newWord.length).fill(""))
     );
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
@@ -65,7 +67,7 @@ const Game = () => {
         if (loaded) {
             storeStatus();
         }
-    }, [win, lose, played, wordCount])
+    }, [win, lose, played, gamePlayed])
 
 
     const storeState = async () => {
@@ -73,7 +75,8 @@ const Game = () => {
             rows,
             curRow,
             curCol,
-            gameState
+            gameState,
+            newWord,
         }
         try {
             const dataString = JSON.stringify(data);
@@ -88,6 +91,7 @@ const Game = () => {
         const dataString = await AsyncStorage.getItem("@game");
         try {
             const data = JSON.parse(dataString);
+            setNewWord(data.newWord);
             setRows(data.rows);
             setCurRow(data.curRow);
             setCurCol(data.curCol);
@@ -104,7 +108,7 @@ const Game = () => {
             played,
             win,
             lose,
-            wordCount
+            gamePlayed
         }
         try {
             const dataString = JSON.stringify(data);
@@ -120,7 +124,7 @@ const Game = () => {
             setWin(data.win);
             setLose(data.lose);
             setPlayed(data.played);
-            setWordCount(data.wordCount)
+            setGamePlayed(data.gamePlayed)
         } catch (e) {
             console.log("Couldn't read the status");
         }
@@ -238,11 +242,12 @@ const Game = () => {
     const nextLevel = async () => {
         try {
             await AsyncStorage.removeItem("@game")
-            const newLetter = words[wordCount + 1]
-            setWordCount(prevCount => prevCount + 1)
+            setNewWord(randomWords())
+            // const newLetter = words[gamePlayed + 1]
+            setGamePlayed(prevCount => prevCount + 1)
 
             setRows(
-                new Array(NUMBER_OF_TRIES).fill(new Array(newLetter.length).fill(""))
+                new Array(NUMBER_OF_TRIES).fill(new Array(newWord.length).fill(""))
             )
             setCurRow(0);
             setCurCol(0);
@@ -331,7 +336,7 @@ const Game = () => {
                             }}>
                                 <Text>Try again</Text>
                             </Pressable>
-                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL == wordCount + 1 || gameState == "playing"} style={{
+                            <Pressable onPress={nextLevel} disabled={TOTAL_LEVEL == gamePlayed + 1 || gameState == "playing"} style={{
                                 flex: 1,
                                 backgroundColor: colors.primary,
                                 borderRadius: 25,
@@ -339,7 +344,7 @@ const Game = () => {
                                 padding: 10,
                                 alignItems: "center",
                                 justifyContent: "center",
-                                elevation:5
+                                elevation: 5
                             }}>
                                 <Text>Next level</Text>
                             </Pressable>
@@ -357,7 +362,7 @@ const Game = () => {
                     <View style={styles.model}>
                         <AntDesign name="closecircleo" size={24} color={colors.grey} style={{ alignSelf: "flex-end", position: "absolute", padding: 10 }} onPress={() => { setHelpModal(!helpModal) }} />
                         <Help />
-                        
+
                     </View>
                 </View>
             </Modal>
